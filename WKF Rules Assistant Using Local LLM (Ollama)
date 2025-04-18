@@ -1,0 +1,312 @@
+# Import necessary modules
+import requests
+
+# Data from the WKF Kumite Handbook
+categories = {
+    "Competitor Attire": [
+        {"questions": [
+            "What must competitors wear during a bout?",
+            "What is the required attire for competitors?",
+            "What should competitors wear during a karate match?",
+            "What are the dress requirements for a karate competition?"
+        ],
+            "answer": "Competitors must wear a WKF-approved white Karategi (karate uniform) without piping or personal embroidery, except for specific details allowed by the WKF Executive Committee. They must also wear a WKF-approved red or blue belt and WKF-approved protective gear (mitts, gum shield, body protector, shin pads, foot protection, groin guard for males, and breast protector for females)."},
+
+        {"questions": [
+            "What are competitors prohibited from wearing?",
+            "What should competitors not wear during a match?",
+            "What are the restrictions on competitor attire?"
+        ],
+            "answer": "Competitors are prohibited from wearing any unauthorized apparel, personal embroidery, jewelry, or items that might harm themselves or their opponents, such as glasses, metal hair grips, ribbons, or beads. Non-approved headwear or attire is also forbidden."},
+
+        {"questions": [
+            "What happens if a competitor is inappropriately dressed?",
+            "What if you're wearing inappropriate attire?",
+            "What will happen if a competitor does not meet dress requirements?"
+        ],
+            "answer": "If a competitor is inappropriately dressed, they will be given two minutes to correct the issue. If the issue is not resolved, they may be disqualified."},
+    ],
+
+    "Weigh-In Procedure": [
+        {"questions": [
+            "What is the weigh-in procedure?",
+            "What happens during the official weigh-in?",
+            "Can you explain the weigh-in process?",
+            "How do weigh-ins work?"
+        ],
+            "answer": "The official weigh-in takes place the day before the competition. Competitors must meet the weight limit for their designated category. They can check their weight on official scales starting one hour before the official weigh-in period."},
+
+        {"questions": [
+            "What happens if a competitor is outside the weight limit?",
+            "What are the consequences of being over or under the weight limit?",
+            "What happens if a competitor fails to make weight?"
+        ],
+            "answer": "If a competitor is outside the weight limit, they will be disqualified (KIKEN). A tolerance of 0.2 kg for male categories and 0.5 kg for female categories is allowed."},
+
+        {"questions": [
+            "How many weigh-ins may a competitor have?",
+            "How often can competitors check their weight before the official weigh-in?",
+            "Is there a limit to the number of weigh-ins a competitor can have?",
+            "Do you only get one weigh-in?"
+        ],
+            "answer": "Competitors are allowed one official weigh-in, but they may check their weight multiple times during the unofficial weighing period before the official weigh-in."},
+
+        {"questions": [
+            "What are the weight classes?",
+            "Can you tell me the weight divisions for competitors?",
+            "What are the different weight categories?"
+        ],
+            "answer": "Weight classes vary by gender and age category, and are in kilograms. For adult females the weight classes are -50kg, -55kg, -61kg, -68kg, and +68kg. Adult males have -60kg, -67kg, -75kg, -84kg, and +84kg."},
+    ],
+
+    "Seeding and Competition Formats": [
+        {"questions": [
+            "How does seeding work?",
+            "What is the process for seeding in a tournament?",
+            "How are competitors placed in the tournament bracket?"
+        ],
+            "answer": "Seeding for WKF World Individual Championships and Karate 1 Premier League involves placing the four highest-ranked competitors based on the WKF World Ranking. For Team competitions, the top three medaling teams from the previous World Team Championships are seeded."},
+
+        {"questions": [
+            "How are competitions formatted?",
+            "What is the format of karate competitions?",
+            "What type of format is typically used for karate tournaments?"
+        ],
+            "answer": "Competitions typically follow an elimination system with repechage or a round-robin format. In some events, round-robin formats are used before elimination rounds."},
+
+        {"questions": [
+            "How does elimination with repechage work?",
+            "Can you explain the elimination and repechage system?",
+            "How does the repechage bracket work in karate?"
+        ],
+            "answer": "In the elimination system with repechage, a main single elimination bracket is run to determine the two finalists (who will compete for the gold). Competitors who lost to either one of the two finalists at any point in the main bracket will be pulled in a secondary single elimination bracket, giving them an opportunity to fight for third and fourth place."},
+
+        {"questions": [
+            "How does round robin play work?",
+            "Can you explain how round robin is used in karate competitions?",
+            "What is the round-robin format in karate?"
+        ],
+            "answer": "In round-robin play, competitors face each other in groups of three to four, earning points based on their performance. The competitor with the most points or wins moves to the next stage."},
+    ],
+
+    "Duration of Bout and Failure to Appear on Tatami": [
+        {"questions": [
+            "How long are bouts?",
+            "What is the duration of a karate bout?",
+            "How much time does a competitor have in a match?"
+        ],
+            "answer": "Bouts typically last 3 minutes for individual events, although finals bouts may be up to 5 minutes. If a competitor has an 8-point lead, the referee will end the bout early."},
+
+        {"questions": [
+            "What happens if a competitor fails to appear on the tatami?",
+            "What happens if a competitor does not show up to the match?",
+            "What are the consequences for failing to appear on the tatami?"
+        ],
+            "answer": "If a competitor fails to appear on the tatami, they will be disqualified, and their opponent will win by default. In round-robin, the score is set to 4-0 in favor of the present competitor."},
+    ],
+
+    "Starting, Ending, Suspending of Matches": [
+        {"questions": [
+            "How do competitors enter the ring of play?",
+            "How do competitors enter the tatami?",
+            "What is the procedure for competitors entering the mat?"
+        ],
+            "answer": "Competitors enter the tatami after the bowing ceremony. They bow to each other and the referee before taking their positions."},
+
+        {"questions": [
+            "How does the referee start the match?",
+            "What does the referee do to begin a match?",
+            "How does the referee initiate a bout?"
+        ], "answer": "The referee announces 'SHOBU HAJIME!' to start the match."},
+
+        {"questions": [
+            "How does the referee halt the match?",
+            "What does the referee do to stop the match?",
+            "How is the match halted?"
+        ],
+            "answer": "The referee halts the match by announcing 'YAME' for reasons like completing a scoring action, injury, stalling, or safety concerns."},
+    ],
+
+    "Scoring in Karate": [
+        {"questions": [
+            "How do you score points in karate?",
+            "What are the scoring rules for karate?",
+            "How is scoring done in karate?"
+        ],
+            "answer": "Points are awarded when two or more judges signal a score, or if the Video Review Supervisors agree after a video review. Competitors earn one point per punch to the body or head, two points per body kick, and three points per head kick OR per takedown followed by a punch to the downed opponent."},
+
+        {"questions": [
+            "Where are the legal scoring areas?",
+            "What areas are legal for scoring in karate?",
+            "Which parts of the body are you allowed to hit?"
+        ],
+            "answer": "Legal scoring areas are the body above the pelvis (CHUDAN) and above the collarbone (JODAN), excluding the shoulders and back of the head."},
+
+        {"questions": [
+            "What criteria is needed for a technique to score?",
+            "What makes a technique valid for scoring?",
+            "What conditions must a technique meet to be counted as a point?",
+            "What makes a technique count?"
+        ],
+            "answer": "The technique must have good form, sporting attitude, vigorous application, awareness of the opponent, good timing, and correct distance."},
+
+        {"questions": [
+            "How much contact is allowed?",
+            "What level of contact is permitted in karate matches?",
+            "Can competitors make full contact in a karate match?",
+            "How hard can you hit in karate?"
+        ],
+            "answer": "Contact must be controlled, especially for head techniques (JODAN). For competitors under 14, no touch to the head is allowed. For fully-grown adults, a reasonable amount of force is allowed, though good control should still be shown."},
+    ],
+
+    "Prohibited Behavior": [
+        {"questions": [
+            "What behaviors are prohibited?",
+            "What actions are not allowed during a match?",
+            "What kind of behavior is forbidden in karate?",
+            "Are there things you're not allowed to do during a match?"
+        ],
+            "answer": "Common prohibited behaviors include stalling, unsportsmanlike conduct, excessive contact (with respect to competitor age), attacks to joints or the face with open hand techniques, clinching with both hands, attempting a takedown in which the pivot point is above the belt, exiting the competition area, or feigning an injury."},
+
+        {"questions": [
+            "What happens if an athlete commits a prohibited behavior?",
+            "What are the consequences for violating the rules?",
+            "What happens if an athlete breaks the rules during the competition?"
+        ],
+            "answer": "Athletes may face warnings, penalties, or disqualification, depending on the severity of the violation."},
+    ],
+
+    "Warnings and Penalties": [
+        {"questions": [
+            "What are the different categories of penalties?",
+            "Can you explain the penalties in karate?",
+            "What types of penalties can occur in a match?"
+        ],
+            "answer": "Penalties include HANSOKU (disqualification from the bout) and SHIKKAKU (disqualification from the entire tournament)."},
+
+        {"questions": [
+            "What happens if an athlete commits a penalty?",
+            "What are the consequences for receiving a penalty?",
+            "What happens if an athlete is penalized?"
+        ],
+            "answer": "The athlete may be disqualified from the bout or the entire tournament depending on the severity of the infraction."},
+    ],
+
+    "Injuries": [
+        {"questions": [
+            "When is a competitor declared unfit to fight?",
+            "What makes a competitor unfit to continue?"
+        ],
+            "answer": "A competitor is unfit to fight if they lose consciousness, show concussion symptoms, or have an injury that prevents them from continuing."},
+
+        {"questions": [
+            "Are knockouts allowed?",
+            "Can competitors win by knockout?",
+            "Can you knock your opponent out in karate?"
+        ],
+            "answer": "Yes, knockouts are allowed. If a competitor is knocked out, they are considered unfit to continue. A decision will be made as to whether the technique was legal (in which case the competitor who delivered the attack will be the winner), or illegal (in which case the competitor who delivered the attack will be disqualified."},
+
+        {"questions": [
+            "What is the procedure for handling injuries?",
+            "What happens if there is an injury during a match?",
+            "How are injuries treated in karate competitions?",
+            "What happens if someone gets injured?"
+        ],
+            "answer": "If an injury occurs, the referee stops the bout, and a tournament doctor evaluates the competitor. They have three minutes for treatment."},
+    ],
+
+    "Criteria for Decision": [
+        {"questions": [
+            "What happens if both competitors score at the same time?",
+            "What occurs if both competitors land a hit simultaneously?",
+            "How is a tie handled if both competitors score at once?",
+            "What if both people score at the same time?"
+        ], "answer": "Both competitors are awarded their respective points if multiple judges signal the score."},
+
+        {"questions": [
+            "How do you win a bout?",
+            "What is the condition for winning a match?",
+            "How is a winner determined in karate?"
+        ],
+            "answer": "A competitor wins by having the highest score when time expires or by achieving an 8-point lead."},
+
+        {"questions": [
+            "What if the score ends in a tie?",
+            "How is a tie resolved?",
+            "What happens if there is no winner after time is up?"
+        ], "answer": "If the score is tied, the decision goes to SENSHU (first unopposed score advantage), or if needed, HANTEI (a vote by judges)."},
+    ],
+
+    "Eligibility to Compete": [
+        {"questions": [
+            "How old must competitors be?",
+            "What is the age requirement for competitors?",
+            "How old do you need to be to compete?"
+        ],
+            "answer": "For Senior Kumite, competitors must be at least 18 years old. There are age categories for younger competitors, like Under 21 (18-20 years old), Junior (16-17 years old), and Cadet (14-15 years old)."},
+
+        {"questions": [
+            "How many athletes per country may compete?",
+            "How many competitors can a country send to the tournament?",
+            "What is the limit for athletes from each country?"
+        ],
+            "answer": "Each National Federation can send one competitor per category in major tournaments, but open events like Karate 1 have no such restriction."},
+
+        {"questions": [
+            "Can competitors compete for a country they are not a citizen of?",
+            "Can athletes compete for a country they are not a citizen of?",
+            "Can a competitor represent a country where they are not a citizen?"
+        ],
+            "answer": "Competitors typically represent the country of their nationality, but exceptions exist for dual nationals or those acquiring a new nationality."},
+    ],
+}
+
+import difflib
+
+
+def find_most_relevant_qas(user_input, top_n=5):
+    scores = []
+    for category_items in categories.values():
+        for item in category_items:
+            for question in item["questions"]:
+                similarity = difflib.SequenceMatcher(None, user_input.lower(), question.lower()).ratio()
+                scores.append((similarity, question, item["answer"]))
+
+    top_matches = sorted(scores, reverse=True)[:top_n]
+    context = "\n\n".join([f"Q: {q}\nA: {a}" for _, q, a in top_matches])
+    return context
+
+
+# Function to get response from Ollama
+def get_response(user_input):
+    try:
+        context = find_most_relevant_qas(user_input)
+        full_prompt = (
+            "You are a WKF Karate rules assistant. Use the following reference to answer the question:\n\n"
+            + context +
+            f"\n\nQuestion: {user_input}\nAnswer:"
+        )
+
+        response = requests.post("http://localhost:11434/api/generate", json={
+            "model": "gemma:2b",
+            "prompt": full_prompt,
+            "stream": False
+        })
+
+        response.raise_for_status()
+        return response.json()["response"]
+    except Exception as e:
+        return f"Error communicating with Ollama: {e}"
+
+
+# Main interactive loop
+print("Welcome to the Karate Rules Assistant (Ollama version)! Ask me anything about WKF Kumite rules.")
+print("Type 'exit' anytime to quit.\n")
+
+while True:
+    user_question = input("Your Question: ")
+    if user_question.lower().strip() in ("exit", "quit"):
+        print("Goodbye!")
+        break
+    answer = get_response(user_question)
+    print(f"Answer: {answer}\n")
